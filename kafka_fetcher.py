@@ -3,7 +3,7 @@ import subprocess
 from kafka import KafkaConsumer, KafkaAdminClient, TopicPartition
 
 psk_file = "/etc/zabbix/encrypt.psk"
-psk_identity = "sF:->!KAyL6RzrWT.#ZX84"
+psk_identity = "yuh"
 
 group_id = "my-cool-group"
 topic = "test-topic"
