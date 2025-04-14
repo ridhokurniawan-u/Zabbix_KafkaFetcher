@@ -1,19 +1,28 @@
+import logging
+import logging.config
 import time
 import subprocess
 from kafka import KafkaConsumer, KafkaAdminClient, TopicPartition
 
-psk_file = "/etc/zabbix/encrypt.psk"
-psk_identity = "yuh"
+psk_file = "/loc/of/encrypt.psk"
+psk_identity = "psk"
 
 group_id = "my-cool-group"
 topic = "test-topic"
-broker = "192.168.1.205:9092"
+broker = "192.168.1.1:9092"
 
 admin = KafkaAdminClient(bootstrap_servers=broker)
 consumer = KafkaConsumer(group_id=group_id, bootstrap_servers=broker)
 
 prev_offsets = {}
 prev_time = time.time()
+
+logging.basicConfig(
+    filename="C:/Users/devop/Documents/kafkascript/kafka.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 while True:
     print("=" * 30)
@@ -43,6 +52,8 @@ while True:
         prev = prev_offsets.get(tp.partition, latest)
         message_throughput += max(latest - prev, 0)
         prev_offsets[tp.partition] = latest
+
+        logging.info(f"Partition {tp.partition} | Committed: {committed} | Latest: {latest} | Lag: {latest - (committed or 0)}")
 
     through_per_sec = message_throughput / elapsed_time if elapsed_time else 0
 
@@ -119,17 +130,7 @@ while True:
     prev_time = time.time()
 
     result = subprocess.run(cmd_partition, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print("Zabbix Kafka Partition push result:", result.stdout.decode())
-
     result = subprocess.run(cmd_heartbeat, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print("Zabbix Kafka Heartbeat push result:", result.stdout.decode())
-
     result = subprocess.run(cmd_health, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print("Zabbix Kafka Health push result:", result.stdout.decode())
-
     result = subprocess.run(cmd_lag, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print("Zabbix Kafka Lag push result:", result.stdout.decode())
-
     result = subprocess.run(cmd_throughput, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print("Zabbix Kafka Throughput push result:", result.stdout.decode())
-
