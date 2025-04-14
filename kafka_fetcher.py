@@ -30,7 +30,6 @@ while True:
     consumer.assign(tps)
 
     total_lag = 0
-    consumer.seek_to_end()
 
     current_time = time.time()
     elapsed_time = current_time - prev_time
